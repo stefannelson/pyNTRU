@@ -7,24 +7,17 @@ def keyGen(p,q,N):
     Creates Public and Private Keys.
     '''
     
-    # Find f, f_p, f_q (given currently) 
-    # TODO: Mechanism to select a function f s.t. fp,fq exist. 
-
+    # Find f, f_p, f_q  
     f = B(df)
     fp = find_inv(f,p)
     fq = find_inv(f,q)
-    while f.convolution(fp)[0] != 1 or f.convolution(fp)[0] != 1:
+    while (f.convolution(fp)[0] != 1 and fp.c.sum() != 1) or \
+          (f.convolution(fq)[0] != 1 and fq.c.sum() != 1):
         f = B(df)
         fp = find_inv(f,p)
         fq = find_inv(f,q)
-    
-    '''
-    f = trunc_polynomial([-1,0,-1,0,-1,0,1,0,1,1,1]) # in L_f -> B(df)
-    fp = trunc_polynomial([1,0,1,0,1,2,2,2,1,0]) # find_inv(f, p)
-    fq = trunc_polynomial([45,49,26,40,53,47,21,24,60,32,31]) # find_inv(f,q)
-    '''
 
-    g = B(dg)#trunc_polynomial([-1,-1,0,-1,0,1,0,1,0,1]) # B(dg)
+    g = B(dg) 
     h = g.convolution(fq).scale(q)
 
     pub_key = (N, h, p, q, df, dg, dr)
