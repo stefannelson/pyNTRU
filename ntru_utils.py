@@ -1,6 +1,8 @@
 import numpy as np
 from random import SystemRandom
 from sympy import symbols, div, Poly
+from sympy.polys.domains import ZZ
+from sympy.polys.galoistools import gf_gcdex
 from parameters import *
 
 
@@ -122,16 +124,8 @@ def eea(a,b):
 
     return gcd, s, t
 
+'''
 def find_inv(poly, mod): 
-    '''
-    Takes a function f and finds a polynomial that 
-    is its inverse mod p/q. 
-
-    Inputs:
-    -------
-    poly : np.array
-    mod  : int
-    '''
 
     xNminus1 = np.zeros(N+1)
     xNminus1[0] = 1                                 # Creates x^N - 1
@@ -155,16 +149,6 @@ def find_inv(poly, mod):
         r.append(tmp[1])
     i_max = i
 
-    '''
-    print('q:')
-    for ind in q:
-        print(trunc_polynomial(ind))
-    
-    print("r:")
-    for ind in r:
-        print(trunc_polynomial(ind))
-    '''
-
     i = 2
     A = [trunc_polynomial(1), trunc_polynomial(0)]
     B = [trunc_polynomial(0), trunc_polynomial(1)]
@@ -178,3 +162,16 @@ def find_inv(poly, mod):
         inv = eea(r[-1], mod)[-1]
 
     return trunc_polynomial((inv*A[-1].coeffs) % mod)
+'''
+
+def find_inv(poly, mod):
+    xNminus1 = np.zeros(N+1)
+    xNminus1[0] = 1
+    xNminus1[-1] = -1
+
+    f_poly = ZZ.map(poly)
+    x_mod = ZZ.map(xNminus1)
+    s, t, g = gf_gcdex(f_poly, x_mod, mod, ZZ)
+    if len(g) == 1 and g[0] == 1:
+        return trunc_polynomial(s)
+    return trunc_polynomial(0)

@@ -11,8 +11,8 @@ def keyGen(p,q,N):
     f = B(df)
     fp = find_inv(f,p)
     fq = find_inv(f,q)
-    while (f.convolution(fp)[0] != 1 and fp.c.sum() != 1) or \
-          (f.convolution(fq)[0] != 1 and fq.c.sum() != 1):
+    while (f.convolution(fp).mod(p) != trunc_polynomial(1)) \
+        or (f.convolution(fq).mod(q) != trunc_polynomial(1)):
         f = B(df)
         fp = find_inv(f,p)
         fq = find_inv(f,q)
