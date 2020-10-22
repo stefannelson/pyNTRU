@@ -12,16 +12,37 @@ message = [1,0,1,1,-1,0,1]
 pub_key, pri_key = keyGen(p,q,N)
 
 # Output message as polynomial 
+print("Message:")
+print("-"*10)
+
 print(trunc_polynomial(message))
+
+print("-"*10)
 
 # Encrypt and output
 ciphertext = encrypt(message, pub_key)
+
+print("Ciphertext:")
+print("-"*10)
+
 print(ciphertext)
+
+print("-"*10)
+
 
 # Decrypt, output, and determine if it's same as original msg
 new_message = decrypt(ciphertext, pri_key)
+
+print("Decrypted Message:")
+print("-"*10)
+
 print(new_message)
-print(trunc_polynomial(message).mod(p) == new_message)
+
+print("-"*10)
+
+
+print("Do they match?",trunc_polynomial(message).mod(p) == new_message)
+
 '''
 
 ftest = trunc_polynomial([-1,-1,1,-1,1,0,-1,1,0,0])
