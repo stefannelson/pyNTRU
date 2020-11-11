@@ -11,6 +11,11 @@ message = [1,0,1,1,-1,0,1]
 # Test Key Generation
 pub_key, pri_key = keyGen(p,q,N)
 
+# Output h
+print("h = ")
+print(pub_key[1])
+print("-"*10)
+
 # Output message as polynomial 
 print("Message:")
 print("-"*10)
