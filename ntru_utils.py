@@ -164,10 +164,10 @@ def find_inv(poly, mod):
     return trunc_polynomial((inv*A[-1].coeffs) % mod)
 '''
 
-def find_inv(poly, mod):
+def find_inv(poly, mod, constant = -1):
     xNminus1 = np.zeros(N+1)
     xNminus1[0] = 1
-    xNminus1[-1] = -1
+    xNminus1[-1] = constant
 
     f_poly = ZZ.map(poly)
     x_mod = ZZ.map(xNminus1)
