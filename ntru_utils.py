@@ -6,6 +6,104 @@ from sympy.polys.galoistools import gf_gcdex
 from parameters import *
 
 
+class trunc_poly(np.poly1d):
+    '''
+    Create child class of numpy's poly1d class. 
+    Preserves element-wise addition, subtraction, etc.
+    but adds in convolution and modular arithmetic to ensure 
+    element is in ring Z_q[x]/(x^p-a).
+    '''
+
+    def __init__(self, coeffs, mod, n, consta = -1):
+        '''
+        Use poly1d class to initialize, tacking on
+        mod, n, and consta attributes (all ints).
+        '''
+        super().__init__(coeffs)
+        self.mod = mod
+        self.n = n 
+        assert(len(coeffs) <= n)
+        self.consta = consta 
+
+
+    def get_mod():
+        return self.mod
+
+
+    def get_n():
+        return self.n
+
+
+    def get_consta():
+        return self.consta
+
+    
+    def truncate(self, polynomial):
+        '''
+        Truncate the given polynomial given the internal 
+        parameters n/p, and a. 
+        '''
+        polynomial = np.flipud(polynomial)
+
+        N = self.n
+        a = self.consta
+
+        result = np.zeros(N)
+
+        for ct in range(len(polynomial)):
+            if ct < N: 
+                result[ct] += polynomial[ct]
+            else:
+                result[ct % N] += polynomial[ct] * -a
+        
+        return trunc_poly(result, self.mod, N, a)
+
+
+    def truncate_long_div(self, polynomial):
+        '''
+        Divide our element by x^n-lambda and return remainder.
+        This polynomial is in the quotient ring Z_q[x]/(x^n+lambda)
+        '''
+        x = symbols('x')
+        element = Poly(polynomial, x)
+
+        divisor = np.zeros(self.n + 1)
+        if self.n != 0:
+            divisor[0] = 1                                 # x^n
+        divisor[-1] = self.consta                          # + Lambda
+        divisor = Poly(divisor, x)
+
+        quo = div(element, divisor)
+        return trunc_poly(np.array(quo[1].all_coeffs()) % self.mod, self.mod, self.n, self.consta)
+
+
+    def mult(self, other):
+        '''
+        Multiplies two truncated polynomials while ensuring
+        the product stays within the polynomial quotient ring/field.
+        '''
+        coeffs = ( (np.poly1d(self.c) * np.poly1d(other.c)).c ) % self.mod
+
+        return self.truncate(coeffs)
+
+
+    def scale(self, mod, center = False):
+        '''
+        Adjusts coefficients of a polynomial to be within a 
+        certain bound defined by mod. The 'center' flag
+        specifies when coefficients must be within +- mod.
+        '''
+        for i in range(len(self)+1):
+            if center:
+                if self[i] < -mod:
+                    self[i] += int(mod*2)
+                elif self[i] > mod:
+                    self[i] -= int(mod*2)
+            elif center == False and self[i] < 0:
+                self[i] += mod 
+        return self
+
+
 class trunc_polynomial(np.poly1d):
     '''
     Create child class of numpy's poly1d class. 
