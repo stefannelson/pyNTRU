@@ -86,6 +86,13 @@ class trunc_poly(np.poly1d):
 
         return self.truncate(coeffs)
 
+    def mod(self, modulus):
+        '''
+        Efficiently takes every coefficient and 
+        calculates the coeffcient mod p/q. 
+        '''
+        return trunc_poly( self.c % modulus, self.mod, self.n, self.consta)
+
 
     def scale(self, mod, center = False):
         '''
