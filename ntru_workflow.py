@@ -6,19 +6,23 @@ def keyGen(p,q,N):
     '''
     Creates Public and Private Keys.
     '''
-    
+
+    ones = np.zeros(N); ones[-1] = 1
+    ones = trunc_poly(ones, N, a)
+
     # Find f, f_p, f_q  
     f = B(df)
+
     fp = find_inv(f,p)
     fq = find_inv(f,q)
-    while (f.convolution(fp).mod(p) != trunc_polynomial(1)) \
-        or (f.convolution(fq).mod(q) != trunc_polynomial(1)):
+    while (f.mult(fp, p) != ones) \
+        or (f.mult(fq, q) != ones):
         f = B(df)
         fp = find_inv(f,p)
-        fq = find_inv(f,q)
+        fq = find_inv(f,q); print('fq * f:\n',f.mult(fq,q)) 
 
     g = B(dg) 
-    h = g.convolution(fq).scale(q)
+    h = g.mult(fq, q).scale(q) 
 
     pub_key = (N, h, p, q, df, dg, dr)
     pri_key = (f, fp)
@@ -35,10 +39,10 @@ def encrypt(msg, pub_key):
     pub_key: tuple 
     '''
     N, h, p, q, df, dg, dr = pub_key
-    m = trunc_polynomial(msg)
+    m = trunc_poly(msg, N, a)
     r = B(dr) #trunc_polynomial([-1,0,1,0,0,1,-1,0,0,1]) #B(dr) 
 
-    e = trunc_polynomial(p * r.convolution(h) + m).mod(q)
+    e = trunc_poly(p * r.mult(h, 10000) + m, N, a).mod(q)
     return e
 
 def decrypt(e, pri_key):
@@ -52,9 +56,9 @@ def decrypt(e, pri_key):
     '''
     f, fp = pri_key
 
-    a = (f.convolution(e)).mod(q)
+    a = f.mult(e,q)
     
     a = a.scale(q/2, center = True)
 
-    m = (fp.convolution(a)).mod(p)
+    m = fp.mult(a, p)
     return m

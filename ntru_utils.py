@@ -14,20 +14,15 @@ class trunc_poly(np.poly1d):
     element is in ring Z_q[x]/(x^p-a).
     '''
 
-    def __init__(self, coeffs, mod, n, consta = -1):
+    def __init__(self, coeffs, n, consta = -1):
         '''
         Use poly1d class to initialize, tacking on
-        mod, n, and consta attributes (all ints).
+        n, and consta attributes (all ints).
         '''
-        super().__init__(coeffs)
-        self.mod = mod
-        self.n = n 
         assert(len(coeffs) <= n)
+        super().__init__(coeffs)
+        self.n = n 
         self.consta = consta 
-
-
-    def get_mod():
-        return self.mod
 
 
     def get_n():
@@ -54,12 +49,12 @@ class trunc_poly(np.poly1d):
             if ct < N: 
                 result[ct] += polynomial[ct]
             else:
-                result[ct % N] += polynomial[ct] * -a
+                result[ct % N] += polynomial[ct] * a
         
-        return trunc_poly(result, self.mod, N, a)
+        return trunc_poly(result, N, a)
 
 
-    def truncate_long_div(self, polynomial):
+    def truncate_long_div(self, polynomial, mod):
         '''
         Divide our element by x^n-lambda and return remainder.
         This polynomial is in the quotient ring Z_q[x]/(x^n+lambda)
@@ -74,15 +69,15 @@ class trunc_poly(np.poly1d):
         divisor = Poly(divisor, x)
 
         quo = div(element, divisor)
-        return trunc_poly(np.array(quo[1].all_coeffs()) % self.mod, self.mod, self.n, self.consta)
+        return trunc_poly(np.array(quo[1].all_coeffs()) % mod, self.n, self.consta)
 
 
-    def mult(self, other):
+    def mult(self, other, mod):
         '''
         Multiplies two truncated polynomials while ensuring
         the product stays within the polynomial quotient ring/field.
         '''
-        coeffs = ( (np.poly1d(self.c) * np.poly1d(other.c)).c ) % self.mod
+        coeffs = ( (np.poly1d(self.c) * np.poly1d(other.c)).c ) % mod
 
         return self.truncate(coeffs)
 
@@ -91,7 +86,7 @@ class trunc_poly(np.poly1d):
         Efficiently takes every coefficient and 
         calculates the coeffcient mod p/q. 
         '''
-        return trunc_poly( self.c % modulus, self.mod, self.n, self.consta)
+        return trunc_poly( self.c % modulus, self.n, self.consta)
 
 
     def scale(self, mod, center = False):
@@ -178,7 +173,7 @@ def B(d):
     sr = SystemRandom()
     while np.count_nonzero(polynomial == 1) + np.count_nonzero(polynomial == -1) < d:
         polynomial[ sr.choice(np.where(polynomial == 0)[0]) ] += sr.choice([-1,1])
-    return trunc_polynomial(polynomial)
+    return trunc_poly(polynomial, N, a)
 
 
 def poly_div_mod(num, den, mod):
@@ -269,14 +264,17 @@ def find_inv(poly, mod):
     return trunc_polynomial((inv*A[-1].coeffs) % mod)
 '''
 
-def find_inv(poly, mod, constant = -1):
-    xNminus1 = np.zeros(N+1)
-    xNminus1[0] = 1
-    xNminus1[-1] = constant
+def find_inv(poly, mod, constant = -a):
+    xN_minus_a = np.zeros(N+1)
+    xN_minus_a[0] = 1
+    xN_minus_a[-1] = constant
 
     f_poly = ZZ.map(poly)
-    x_mod = ZZ.map(xNminus1)
+    x_mod = ZZ.map(xN_minus_a)
     s, t, g = gf_gcdex(f_poly, x_mod, mod, ZZ)
+
+    # Recall that s*f + t*g = h. 
+    # If g = 1, then s is the inverse of f mod t (= x^n-a)
     if len(g) == 1 and g[0] == 1:
-        return trunc_polynomial(s)
-    return trunc_polynomial(0)
+        return trunc_poly(s, N, a)
+    return trunc_poly([0], N, a)

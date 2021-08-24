@@ -5,8 +5,9 @@ from sympy import isprime
 #key_params = {"Low" : [11,3,61], "Moderate" : [167, 3, 128],
 #              "Standard" : [251, 3, 128], "High" : [347,3,128],
 #              "Highest" : [503, 3, 256]}
-
-N, p, q = 503, 3, 257
+N, p, q = 11, 3, 61
+#N, p, q = 503, 3, 257
+a = 1
 
 df = 7
 dg = 6
