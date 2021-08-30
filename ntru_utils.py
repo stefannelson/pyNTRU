@@ -8,7 +8,7 @@ from parameters import *
 
 class trunc_poly(np.poly1d):
     '''
-    Create child class of numpy's poly1d class. 
+    Creates child class of numpy's poly1d class. 
     Preserves element-wise addition, subtraction, etc.
     but adds in convolution and modular arithmetic to ensure 
     element is in ring Z_q[x]/(x^p-a).
@@ -145,7 +145,7 @@ class trunc_polynomial(np.poly1d):
             if ct < N: 
                 result[ct] += init_prod[ct]
             else:
-                result[ct % N] += init_prod[ct]
+                result[ct % N] += init_prod[ct] * a
  
         return result
 
@@ -173,7 +173,7 @@ def B(d):
     sr = SystemRandom()
     while np.count_nonzero(polynomial == 1) + np.count_nonzero(polynomial == -1) < d:
         polynomial[ sr.choice(np.where(polynomial == 0)[0]) ] += sr.choice([-1,1])
-    return trunc_poly(polynomial, N, a)
+    return trunc_polynomial(polynomial)
 
 
 def poly_div_mod(num, den, mod):
@@ -276,5 +276,5 @@ def find_inv(poly, mod, constant = -a):
     # Recall that s*f + t*g = h. 
     # If g = 1, then s is the inverse of f mod t (= x^n-a)
     if len(g) == 1 and g[0] == 1:
-        return trunc_poly(s, N, a)
-    return trunc_poly([0], N, a)
+        return trunc_polynomial(s)
+    return trunc_polynomial(0)

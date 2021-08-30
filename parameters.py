@@ -7,7 +7,7 @@ from sympy import isprime
 #              "Highest" : [503, 3, 256]}
 N, p, q = 11, 3, 61
 #N, p, q = 503, 3, 257
-a = 1
+a = 5
 
 df = 7
 dg = 6
