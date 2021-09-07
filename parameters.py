@@ -5,13 +5,16 @@ from sympy import isprime
 #key_params = {"Low" : [11,3,61], "Moderate" : [167, 3, 128],
 #              "Standard" : [251, 3, 128], "High" : [347,3,128],
 #              "Highest" : [503, 3, 256]}
-N, p, q = 11, 3, 61
+#N, p, q = 11, 3, 61
 #N, p, q = 503, 3, 257
-a = 5
 
-df = 7
-dg = 6
-dr = 5
+# Parameters correspond to the ring Z_q[x]/(x^N - a)
+# p defines allowed coefficients in the message.
+N, p, q, a = 1201, 3, 12011, 8
+
+df = 501#7
+dg = 500#6 # q/8 - 2 
+dr = 502#5
 
 # Enforce constraints on NTRU Parameter set: 
 assert df <= N
