@@ -10,6 +10,9 @@ from sympy import isprime
 
 # Parameters correspond to the ring Z_q[x]/(x^N - a)
 # p defines allowed coefficients in the message.
+
+bernstein18 = True
+
 N, p, q, a = 1201, 3, 12011, 8
 
 df = 501#7

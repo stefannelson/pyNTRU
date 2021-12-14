@@ -11,7 +11,7 @@ class trunc_poly(np.poly1d):
     Creates child class of numpy's poly1d class. 
     Preserves element-wise addition, subtraction, etc.
     but adds in convolution and modular arithmetic to ensure 
-    element is in ring Z_q[x]/(x^p-a).
+    element is in ring Z_q[x]/(x^p-a) OR Z_q[x]/(x^p-x-1).
     '''
 
     def __init__(self, coeffs, n, consta = -1):
@@ -57,19 +57,22 @@ class trunc_poly(np.poly1d):
     def truncate_long_div(self, polynomial, mod):
         '''
         Divide our element by x^n-lambda and return remainder.
-        This polynomial is in the quotient ring Z_q[x]/(x^n+lambda)
+        This polynomial is in the quotient ring Z_q[x]/(x^n-x-1)
         '''
+        print("In Long Division!")
         x = symbols('x')
         element = Poly(polynomial, x)
 
         divisor = np.zeros(self.n + 1)
         if self.n != 0:
             divisor[0] = 1                                 # x^n
-        divisor[-1] = self.consta                          # + Lambda
+            divisor[-2] = -1                               # -x
+            divisor[-1] = -1                               # -1
+        else: divisor[-1] = self.consta
         divisor = Poly(divisor, x)
 
         quo = div(element, divisor)
-        return trunc_poly(np.array(quo[1].all_coeffs()) % mod, self.n, self.consta)
+        return trunc_poly(np.array(quo[1].all_coeffs()) % mod, self.n, -1)
 
 
     def mult(self, other, mod):
@@ -78,6 +81,9 @@ class trunc_poly(np.poly1d):
         the product stays within the polynomial quotient ring/field.
         '''
         coeffs = ( (np.poly1d(self.c) * np.poly1d(other.c)).c ) % mod
+
+        if bernstein18: 
+            return self.truncate_long_div(coeffs, mod)
 
         return self.truncate(coeffs)
 
@@ -137,17 +143,34 @@ class trunc_polynomial(np.poly1d):
         is greater than N, the corresponding coefficient is 
         added to the exponent mod N. 
         '''
+        init_prod = self*other
+
+        if bernstein18:
+            print("In long division!")
+            x = symbols('x')
+            element = Poly(init_prod, x)
+
+            divisor = np.zeros(N + 1)
+            if N != 0:
+                divisor[0] = 1
+                divisor[-2] = -1
+                divisor[-1] = -1
+
+            divisor = Poly(divisor, x)
+            quo = div(element, divisor)
+            return trunc_polynomial(np.array(quo[1].all_coeffs()))
+
+        print("Not in long division!")
         result = trunc_polynomial(np.zeros(N))
         
-        init_prod = self*other
-        
-        for ct in range(len(init_prod)+1):
-            if ct < N: 
-                result[ct] += init_prod[ct]
-            else:
-                result[ct % N] += init_prod[ct] * a
- 
+        if not bernstein18:
+            for ct in range(len(init_prod)+1):
+                if ct < N: 
+                    result[ct] += init_prod[ct]
+                else:
+                    result[ct % N] += init_prod[ct] * a
         return result
+
 
     def mod(self, modulus):
         '''
