@@ -11,13 +11,15 @@ from sympy import isprime
 # Parameters correspond to the ring Z_q[x]/(x^N - a)
 # p defines allowed coefficients in the message.
 
-bernstein18 = True
+# Toggle for Z_q[x]/x^p-x-1 (otherwise, uses x^p-a)
+bernstein18 = False
 
 N, p, q, a = 1201, 3, 12011, 8
 
-df = 501#7
-dg = 500#6 # q/8 - 2 
-dr = 502#5
+# Amount of nonzero terms in f,g,r 
+df = 501
+dg = 500 # q/8 - 2 
+dr = 502
 
 # Enforce constraints on NTRU Parameter set: 
 assert df <= N
